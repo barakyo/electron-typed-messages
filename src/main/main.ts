@@ -9,13 +9,25 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  Menu,
+  Tray,
+  MenuItem,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-import { ProductService, ProductHandler, Handler } from '../services/product.service.ts';
+import {
+  ProductService,
+  ProductHandler,
+  Handler,
+} from '../services/product.service.ts';
 
 class AppUpdater {
   constructor() {
@@ -132,14 +144,42 @@ app.on('window-all-closed', () => {
   }
 });
 
+let tray = null;
+
 app
   .whenReady()
   .then(() => {
-    createWindow();
+    // createWindow();
+    tray = new Tray(
+      'C:\\Users\\Caster\\Development\\typed-messages\\assets\\icon.png'
+    );
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Launch',
+        type: 'radio',
+        click: (menuItem: MenuItem, browserWindow, event) => {
+          console.log(menuItem);
+          if (mainWindow === null) {
+            createWindow();
+          }
+        },
+      },
+      {
+        label: 'Close Window',
+        type: 'radio',
+        click: (menuItem) => {
+          console.log(menuItem);
+          mainWindow?.close();
+        },
+      },
+    ]);
+
+    tray.setContextMenu(contextMenu);
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      // if (mainWindow === null) createWindow();
     });
   })
   .catch(console.log);
